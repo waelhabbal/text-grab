@@ -32,33 +32,12 @@ export function activate(context: vscode.ExtensionContext) {
     const rootPath = workspaceFolder.uri.fsPath;
     const config = await loadConfig(rootPath);
 
-    const extensions = await getConfigValue(
-      config.extensions,
-      "File patterns",
-      "*.ts, *.js, ..."
-    );
-    const includeFolders = await getConfigValue(
-      config.includeFolders,
-      "Folders",
-      "src , app, ..."
-    );
-    const exclude = await getConfigValue(
-      config.exclude,
-      "excluded folders/files",
-      "node_modules, dist"
-    );
-
-    if (!extensions?.length || !includeFolders?.length) {
-      vscode.window.showErrorMessage("Required configuration missing.");
-      return;
-    }
-
     try {
       const content = await processFiles(
         rootPath,
-        extensions,
-        includeFolders,
-        exclude || []
+        config.extensions,
+        config.includeFolders,
+        config.exclude
       );
       await vscode.env.clipboard.writeText(content);
       vscode.window.showInformationMessage(
