@@ -1,6 +1,6 @@
 {
-  "name": "file-content-combiner",
-  "displayName": "File Content Combiner",
+  "name": "textgrab",
+  "displayName": "Text Grab",
   "description": "A VS Code extension to copy file contents based on patterns.",
   "version": "0.0.1",
   "engines": {
@@ -10,14 +10,14 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:copy-files-content.copyFilesContent"
+    "onCommand:textgrab.copyFilesContent"
   ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "copy-files-content.copyFilesContent",
-        "title": "Copy Files Content"
+        "command": "textgrab.copyFilesContent",
+        "title": "Text Grab: Copy Files Content"
       }
     ]
   },
