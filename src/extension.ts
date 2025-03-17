@@ -10,43 +10,36 @@ interface Config {
 }
 
 export function activate(context: vscode.ExtensionContext) {
-  // Register the command
-  const commandId = "copy-files-content.copyFilesContent";
-  let disposable = vscode.commands.registerCommand(commandId, async () => {
-    if (!vscode.workspace.workspaceFolders) {
+  const commandId = "textgrab.copyFilesContent"; 
+
+  const disposable = vscode.commands.registerCommand(commandId, async () => {
+    const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+    if (!workspaceFolder) {
       vscode.window.showErrorMessage("No workspace folder open.");
       return;
     }
 
-    const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+    const rootPath = workspaceFolder.uri.fsPath;
     const config = await loadConfig(rootPath);
 
-    const extensions =
-      config.extensions.length > 0
-        ? config.extensions
-        : await promptForInput(
-            "Enter file patterns (e.g., *.ts, *.js)",
-            "*.ts, *.js",
-            true
-          );
-    const includeFolders =
-      config.includeFolders.length > 0
-        ? config.includeFolders
-        : await promptForInput(
-            "Enter folders to include (e.g., src, lib)",
-            "src",
-            true
-          );
-    const exclude =
-      config.exclude.length > 0
-        ? config.exclude
-        : await promptForInput(
-            "Enter folders/files to exclude (e.g., node_modules, dist)",
-            "node_modules, dist",
-            true
-          );
+    const extensions = await getConfigValue(
+      config.extensions,
+      "File patterns",
+      "*.ts, *.js, ..."
+    );
+    const includeFolders = await getConfigValue(
+      config.includeFolders,
+      "Folders",
+      "src , app, ..."
+    );
+    const exclude = await getConfigValue(
+      config.exclude,
+      "excluded folders/files",
+      "node_modules, dist"
+    );
 
-    if (!extensions || !includeFolders) {
+    if (!extensions?.length || !includeFolders?.length) {
+      vscode.window.showErrorMessage("Required configuration missing.");
       return;
     }
 
@@ -62,22 +55,19 @@ export function activate(context: vscode.ExtensionContext) {
         "File contents copied to clipboard!"
       );
     } catch (error) {
-      const err = error as Error;
-      vscode.window.showErrorMessage(`Error: ${err.message}`);
+      vscode.window.showErrorMessage(`Error: ${(error as Error).message}`);
     }
   });
 
-  // Create a status bar item
   const statusBarItem = vscode.window.createStatusBarItem(
     vscode.StatusBarAlignment.Right,
     100
   );
-  statusBarItem.command = commandId; // Link to the existing command
-  statusBarItem.text = "$(clippy) Copy Files"; // Icon and text
+  statusBarItem.command = commandId;
+  statusBarItem.text = "$(clippy) Copy Files";
   statusBarItem.tooltip = "Copy file contents to clipboard based on config";
-  statusBarItem.show(); // Display the button
+  statusBarItem.show();
 
-  // Add disposables to context
   context.subscriptions.push(disposable, statusBarItem);
 }
 
@@ -92,29 +82,32 @@ async function loadConfig(rootPath: string): Promise<Config> {
 
   let config = defaultConfig;
 
-  if (await fs.pathExists(globalConfigPath)) {
-    const globalConfig = await fs.readJson(globalConfigPath);
-    config = { ...config, ...globalConfig };
-  }
-
-  if (await fs.pathExists(projectConfigPath)) {
-    const projectConfig = await fs.readJson(projectConfigPath);
-    config = { ...config, ...projectConfig };
+  try {
+    if (await fs.pathExists(globalConfigPath)) {
+      config = { ...config, ...(await fs.readJson(globalConfigPath)) };
+    }
+    if (await fs.pathExists(projectConfigPath)) {
+      config = { ...config, ...(await fs.readJson(projectConfigPath)) };
+    }
+  } catch (error) {
+    vscode.window.showWarningMessage(
+      `Invalid config file: ${(error as Error).message}`
+    );
   }
 
   return config;
 }
 
-async function promptForInput(
+async function getConfigValue(
+  configValue: string[],
   prompt: string,
-  placeHolder: string,
-  split: boolean = false
+  placeHolder: string
 ): Promise<string[] | undefined> {
-  const input = await vscode.window.showInputBox({ prompt, placeHolder });
-  if (!input) {
-    return undefined;
+  if (configValue.length > 0) {
+    return configValue;
   }
-  return split ? input.split(",").map((s) => s.trim()) : [input];
+  const input = await vscode.window.showInputBox({ prompt, placeHolder });
+  return input ? input.split(",").map((s) => s.trim()) : undefined;
 }
 
 async function processFiles(
@@ -124,35 +117,38 @@ async function processFiles(
   exclude: string[]
 ): Promise<string> {
   const results: string[] = [];
+  const queue = includeFolders.map((folder) => path.join(rootPath, folder));
 
-  for (const folder of includeFolders) {
-    const dir = path.join(rootPath, folder);
-    if (!(await fs.pathExists(dir))) {
+  while (queue.length) {
+    const dir = queue.shift()!;
+    if (!(await fs.pathExists(dir)) || exclude.some((e) => dir.includes(e))) {
       continue;
     }
 
-    const dirents = await fs.readdir(dir, { withFileTypes: true });
-    for (const dirent of dirents) {
-      const fullPath = path.join(dir, dirent.name);
+    try {
+      const dirents = await fs.readdir(dir, { withFileTypes: true });
+      for (const dirent of dirents) {
+        const fullPath = path.join(dir, dirent.name);
 
-      if (exclude.some((pattern) => fullPath.includes(pattern))) {
-        continue;
-      }
-
-      if (dirent.isDirectory()) {
-        const subContent = await processFiles(
-          rootPath,
-          extensions,
-          [path.relative(rootPath, fullPath)],
-          exclude
-        );
-        if (subContent) {
-          results.push(subContent);
+        if (exclude.some((pattern) => fullPath.includes(pattern))) {
+          continue;
         }
-      } else if (dirent.isFile() && matchesPattern(dirent.name, extensions)) {
-        const content = await fs.readFile(fullPath, "utf8");
-        results.push(`// File: ${fullPath}\n${content}\n`);
+
+        if (dirent.isDirectory()) {
+          queue.push(fullPath);
+        } else if (dirent.isFile() && matchesPattern(dirent.name, extensions)) {
+          try {
+            const content = await fs.readFile(fullPath, "utf8");
+            results.push(`// File: ${fullPath}\n${content}\n`);
+          } catch (error) {
+            console.warn(
+              `Failed to read ${fullPath}: ${(error as Error).message}`
+            );
+          }
+        }
       }
+    } catch (error) {
+      console.warn(`Failed to process ${dir}: ${(error as Error).message}`);
     }
   }
 
@@ -161,7 +157,7 @@ async function processFiles(
 
 function matchesPattern(fileName: string, patterns: string[]): boolean {
   return patterns.some((pattern) => {
-    const regex = new RegExp("^" + pattern.replace(/\*/g, ".*") + "$");
+    const regex = new RegExp("^" + pattern.replace(/\*/g, ".*") + "$", "i");
     return regex.test(fileName);
   });
 }

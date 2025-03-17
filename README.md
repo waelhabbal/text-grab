@@ -1,4 +1,3 @@
-![File Content Combiner Icon](images/icon.png)
 
 # Text Grab
 
@@ -15,14 +14,14 @@ A simple and flexible VS Code extension that copies the content of files in your
 
 ## Installation
 
-1. **Via VS Code Marketplace** (after publishing):
+1. **Via VS Code Marketplace**:
 
    - Search for "Text Grab" in the Extensions view (`Ctrl+Shift+X` or `Cmd+Shift+X` on macOS).
    - Click "Install".
 
 2. **Manual Installation**:
-  
-     - In VS Code, go to the Extensions view, click the `...` menu, and select "Install from VSIX".
+
+   - In VS Code, go to the Extensions view, click the `...` menu, and select "Install from VSIX".
    - Select the downloaded `.vsix` file.
 
 ## Usage
@@ -41,7 +40,7 @@ A simple and flexible VS Code extension that copies the content of files in your
 
 ### Configuration
 
-- **Global Config**: Create `~/..text-grab.config.json` in your home directory.
+- **Global Config**: Create `<user>/.text-grab.config.json` in your home directory.
 - **Project Config**: Create `text-grab.config.json` in your workspace root.
 - Example config:
   ```json
