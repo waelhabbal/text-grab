@@ -3,6 +3,7 @@
   "displayName": "Text Grab",
   "description": "A VS Code extension to copy file contents based on patterns.",
   "version": "0.0.1",
+  "publisher": "waelhabbal",
   "engines": {
     "vscode": "^1.98.0"
   },
