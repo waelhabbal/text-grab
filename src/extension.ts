@@ -20,6 +20,8 @@ export function activate(context: vscode.ExtensionContext) {
   statusBarItem.tooltip = "Copy file contents to clipboard based on config";
   statusBarItem.show();
 
+  context.subscriptions.push(statusBarItem);
+
   const disposable = vscode.commands.registerCommand(commandId, async () => {
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
     if (!workspaceFolder) {
@@ -67,7 +69,7 @@ export function activate(context: vscode.ExtensionContext) {
     }
   });
 
-  context.subscriptions.push(disposable, statusBarItem);
+  context.subscriptions.push(disposable);
 }
 
 async function loadConfig(rootPath: string): Promise<Config> {
