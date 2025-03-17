@@ -15,13 +15,13 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: "20.x"
 
-      - name: Install dependencies
-        run: npm install
+      - name: Install dependencies (Yarn)
+        run: yarn install
 
-      - name: Package extension
-        run: npx vsce package --yarn
+      - name: Package extension (Yarn)
+        run: yarn vsce package --yarn
 
-      - name: Publish extension
-        run: npx vsce publish -p ${{ secrets.VSCODE_MARKETPLACE_TOKEN }} --yarn
+      - name: Publish extension (Yarn)
+        run: yarn vsce publish -p ${{ secrets.VSCODE_MARKETPLACE_TOKEN }} --yarn
