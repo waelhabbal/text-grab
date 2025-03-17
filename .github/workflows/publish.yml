@@ -21,7 +21,7 @@ jobs:
         run: yarn install
 
       - name: Package extension (Yarn)
-        run: yarn vsce package --yarn
+        run: yarn run vsce package --yarn
 
       - name: Publish extension (Yarn)
-        run: yarn vsce publish -p ${{ secrets.VSCODE_MARKETPLACE_TOKEN }} --yarn
+        run: yarn run vsce publish -p ${{ secrets.VSCODE_MARKETPLACE_TOKEN }} --yarn
