@@ -10,7 +10,15 @@ interface Config {
 }
 
 export function activate(context: vscode.ExtensionContext) {
-  const commandId = "textgrab.copyFilesContent"; 
+  const commandId = "textgrab.copyFilesContent";
+  const statusBarItem = vscode.window.createStatusBarItem(
+    vscode.StatusBarAlignment.Right,
+    100
+  );
+  statusBarItem.command = commandId;
+  statusBarItem.text = "$(clippy) Copy Files";
+  statusBarItem.tooltip = "Copy file contents to clipboard based on config";
+  statusBarItem.show();
 
   const disposable = vscode.commands.registerCommand(commandId, async () => {
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
@@ -58,15 +66,6 @@ export function activate(context: vscode.ExtensionContext) {
       vscode.window.showErrorMessage(`Error: ${(error as Error).message}`);
     }
   });
-
-  const statusBarItem = vscode.window.createStatusBarItem(
-    vscode.StatusBarAlignment.Right,
-    100
-  );
-  statusBarItem.command = commandId;
-  statusBarItem.text = "$(clippy) Copy Files";
-  statusBarItem.tooltip = "Copy file contents to clipboard based on config";
-  statusBarItem.show();
 
   context.subscriptions.push(disposable, statusBarItem);
 }
