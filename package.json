@@ -50,5 +50,9 @@
   "dependencies": {
     "fs-extra": "^11.3.0",
     "glob": "^11.0.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/waelhabbal/file-content-combiner.git"
   }
 }
