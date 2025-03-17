@@ -54,5 +54,6 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/waelhabbal/file-content-combiner.git"
-  }
+  },
+  "icon": "images/icon.jpeg"
 }

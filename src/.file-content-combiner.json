@@ -1,0 +1,5 @@
+{
+  "extensions": ["*.ts", "*.js"],
+  "includeFolders": ["src"],
+  "exclude": ["node_modules", "dist"]
+}
