@@ -23,18 +23,26 @@
     "workspace",
     "global configuration"
   ],
-"activationEvents": [
+  "activationEvents": [
     "onStartupFinished",
     "command:textgrab.copyFilesContent",
     "command:textgrab.init",
     "command:textgrab.setTemplate"
-],
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
         "command": "textgrab.copyFilesContent",
         "title": "Text Grab: Copy Files Content"
+      },
+      {
+        "command": "textgrab.init",
+        "title": "Text Grab: Initialize Configuration"
+      },
+      {
+        "command": "textgrab.setTemplate",
+        "title": "Text Grab: Set Template"
       }
     ]
   },
