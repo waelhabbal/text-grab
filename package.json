@@ -2,7 +2,7 @@
   "name": "textgrab",
   "displayName": "Text Grab",
   "description": "A VS Code extension to copy file contents based on patterns.",
-  "version": "0.0.5",
+  "version": "1.0.0",
   "publisher": "waelhabbal",
   "engines": {
     "vscode": ">=1.60.0"
@@ -23,9 +23,12 @@
     "workspace",
     "global configuration"
   ],
-  "activationEvents": [
-    "onStartupFinished"
-  ],
+"activationEvents": [
+    "onStartupFinished",
+    "command:textgrab.copyFilesContent",
+    "command:textgrab.init",
+    "command:textgrab.setTemplate"
+],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
